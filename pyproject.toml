@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qec-neural-decoder"
+version = "0.1.0"
+description = "Minimal AlphaQubit-style neural decoder scaffold for surface-code QEC experiments."
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+  "numpy",
+  "scipy",
+  "pandas",
+  "pyyaml",
+  "tqdm",
+  "matplotlib",
+  "scikit-learn",
+  "h5py",
+  "stim",
+  "pymatching",
+  "torch",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff", "mypy", "types-PyYAML"]
+notebooks = ["jupyter"]
+tracking = ["wandb", "tensorboard"]
+zenodo = ["zenodo_get"]
+
+[tool.setuptools.packages.find]
+include = ["qecml*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B"]
+
+[tool.mypy]
+python_version = "3.9"
+ignore_missing_imports = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

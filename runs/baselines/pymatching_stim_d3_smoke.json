@@ -1,0 +1,14 @@
+{
+  "data": "runs/data/stim_d3_smoke_val.npz",
+  "label_shape": [
+    5000,
+    1
+  ],
+  "num_mistakes": 100,
+  "num_shots": 5000,
+  "prediction_shape": [
+    5000,
+    1
+  ],
+  "pymatching_ler": 0.02
+}

@@ -1,0 +1,29 @@
+# Python/cache artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Large/raw datasets
+/data/
+*.zip
+
+# Generated experiment outputs
+/runs/data/
+/runs/checkpoints/
+/runs/mlp_d3_smoke/
+/runs/mlp_zenodo_d3_r01_smoke/
+*.pt
+*.npz
+
+# Local/editor files
+.DS_Store
+.idea/
+.vscode/

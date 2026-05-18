@@ -1,0 +1,9 @@
+basis: z
+distance: 5
+rounds: 5
+p: 0.005
+shots_train: 20000
+shots_val: 5000
+seed: 1
+output_train: runs/data/stim_d5_small_train.npz
+output_val: runs/data/stim_d5_small_val.npz
