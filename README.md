@@ -122,6 +122,113 @@ python scripts/inspect_zenodo_6804040.py
 The inspection script prints the archive tree, extracts README-like files, identifies likely
 sample/circuit/prediction/metadata files, and writes `runs/zenodo_6804040_inspection.md`.
 
+## Data Examples
+
+The examples below come from the downloaded Zenodo 6804040 experiment:
+
+```text
+surface_code_bX_d3_r01_center_3_5
+```
+
+This is a surface-code memory experiment with:
+
+```text
+basis: X
+distance: 3
+rounds: 1
+shots: 50000
+circuit_detectors: 8
+circuit_observables: 1
+```
+
+The raw archive stores detector events in Stim `b8` format, where each shot is bit-packed and
+byte-aligned. For this experiment there are 8 detector bits per shot, so each shot is exactly one
+byte in `detection_events.b8`. The first 16 raw bytes are:
+
+```python
+[96, 66, 0, 0, 0, 68, 0, 0, 0, 32, 0, 0, 0, 0, 0, 0]
+```
+
+Labels are stored in `obs_flips_actual.01`, one logical observable flip per line. The first 12
+raw label lines are:
+
+```python
+["0", "0", "0", "0", "0", "0", "0", "0", "0", "1", "0", "0"]
+```
+
+The Zenodo archive also provides PyMatching predictions. The first 12 raw PyMatching prediction
+lines for the same experiment are:
+
+```python
+["0", "0", "0", "0", "0", "0", "0", "0", "0", "1", "0", "0"]
+```
+
+After conversion to this repo's common `.npz` schema, the validation split used for the first ML
+run is:
+
+```text
+file: runs/data/zenodo_6804040_surface_code_bX_d3_r01_center_3_5_val.npz
+shots: 10000
+source shots: 40000 through 49999
+events shape: [10000, 8]
+labels shape: [10000, 1]
+detector_coords shape: [8, 3]
+label positive rate: 0.0795
+```
+
+The first 8 converted validation detector-event rows are:
+
+```python
+[
+    [1, 0, 0, 0, 1, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 1, 0, 1, 0, 0, 1],
+    [0, 0, 0, 0, 0, 0, 1, 1],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 1, 0, 0, 0, 1, 0],
+    [0, 0, 0, 0, 0, 0, 0, 1],
+]
+```
+
+The corresponding ground-truth logical observable flip labels are:
+
+```python
+[0, 0, 0, 0, 0, 0, 0, 1]
+```
+
+The detector coordinates extracted from `circuit_ideal.stim` are:
+
+```python
+[
+    [1.0, 4.0, 0.0],
+    [3.0, 4.0, 0.0],
+    [3.0, 6.0, 0.0],
+    [5.0, 6.0, 0.0],
+    [1.0, 4.0, 1.0],
+    [3.0, 4.0, 1.0],
+    [3.0, 6.0, 1.0],
+    [5.0, 6.0, 1.0],
+]
+```
+
+For these same 8 validation shots, the current trained `FlatMLPDecoder` produced:
+
+```python
+logits = [-2.7008, -6.3271, -0.0952, -0.0649, -6.3271, -6.3271, -2.5803, 5.5866]
+probs  = [0.0629, 0.0018, 0.4762, 0.4838, 0.0018, 0.0018, 0.0704, 0.9963]
+preds  = [0, 0, 0, 0, 0, 0, 0, 1]
+```
+
+The Zenodo-provided PyMatching predictions on the same 8 validation shots are:
+
+```python
+[0, 0, 0, 0, 0, 0, 0, 1]
+```
+
+On the full 10,000-shot validation split, the current flat MLP reached logical error rate
+`0.0491`, while the provided PyMatching predictions reached `0.0139`.
+
 ## Known Limitations
 
 This is not an official AlphaQubit reproduction.
