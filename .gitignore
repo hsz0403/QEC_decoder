@@ -20,6 +20,9 @@ env/
 /runs/checkpoints/
 /runs/mlp_d3_smoke/
 /runs/mlp_zenodo_d3_r01_smoke/
+/runs/mlp_zenodo_d3_r25_smoke/
+/runs/mini_aq_zenodo_d3_r01_smoke/
+/runs/mini_aq_zenodo_d3_r25_smoke/
 *.pt
 *.npz
 

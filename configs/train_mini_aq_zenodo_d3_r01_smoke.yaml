@@ -1,0 +1,20 @@
+data:
+  train: runs/data/zenodo_6804040_surface_code_bX_d3_r01_center_3_5_train.npz
+  val: runs/data/zenodo_6804040_surface_code_bX_d3_r01_center_3_5_val.npz
+model:
+  name: mini_alphaqubit
+  hidden_dim: 64
+  num_layers: 1
+  num_heads: 4
+  dropout: 0.1
+training:
+  batch_size: 512
+  epochs: 10
+  lr: 0.0005
+  weight_decay: 0.00001
+  grad_clip_norm: 1.0
+  pos_weight: auto
+  seed: 0
+  num_threads: 1
+output:
+  run_dir: runs/mini_aq_zenodo_d3_r01_smoke

@@ -358,7 +358,7 @@ Total:                  4,929
 This model is a flat baseline. It does not explicitly use lattice geometry, temporal recurrence,
 attention, or local matching structure.
 
-Other implemented models, not yet fully trained on this real split:
+Other implemented models:
 
 ```text
 TemporalCNNDecoder:
@@ -372,6 +372,42 @@ MiniAlphaQubitDecoder:
   Uses MultiheadAttention over sites.
   Uses feed-forward blocks and final site pooling.
 ```
+
+MiniAlphaQubitDecoder smoke results were later run on real Zenodo data:
+
+```text
+Experiment: surface_code_bX_d3_r01_center_3_5
+Dense validation shape: [10000, 3, 4, 1]
+hidden_dim: 64
+num_layers: 1
+num_heads: 4
+dropout: 0.1
+parameters: 79,681
+epochs: 10
+loss: binary cross entropy with logits
+optimizer: AdamW
+validation LER: 0.0446
+validation BCE: 0.10686307400465012
+validation accuracy: 0.9554
+validation ROC-AUC: 0.9893060580283479
+```
+
+This is slightly better than the flat MLP on the same r=1 split (`0.0491` LER), but still worse
+than the provided PyMatching predictions (`0.0139` LER).
+
+A harder real-data smoke run was also attempted:
+
+```text
+Experiment: surface_code_bX_d3_r25_center_3_5
+Dense shape: [B, 26, 8, 1]
+MiniAlphaQubit-style epochs: 5
+MiniAlphaQubit-style best LER: 0.4855
+FlatMLP best LER: 0.4839
+Provided PyMatching LER: 0.4258
+```
+
+The r=25 result did not learn beyond a trivial baseline. It should be treated as a negative CPU
+smoke result, not as evidence that the architecture is competitive.
 
 ## 7. Training Configuration
 

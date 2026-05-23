@@ -229,6 +229,61 @@ The Zenodo-provided PyMatching predictions on the same 8 validation shots are:
 On the full 10,000-shot validation split, the current flat MLP reached logical error rate
 `0.0491`, while the provided PyMatching predictions reached `0.0139`.
 
+## Mini AlphaQubit-Style Result
+
+The repo also includes a small AlphaQubit-style recurrent transformer decoder:
+
+```text
+qecml/decoders/neural/mini_alphaqubit.py
+```
+
+It is not an official AlphaQubit reproduction. It is a compact open implementation with the same
+high-level idea of processing detector events as a space-time sequence with per-site recurrent
+state and site self-attention.
+
+For the real `surface_code_bX_d3_r01_center_3_5` split above, coordinate mapping converts flat
+events into:
+
+```text
+dense events: [10000, 3, 4, 1] on validation
+```
+
+The trained smoke model uses:
+
+```text
+hidden_dim: 64
+num_layers: 1
+num_heads: 4
+dropout: 0.1
+parameters: 79,681
+loss: binary cross entropy with logits
+optimizer: AdamW
+epochs: 10
+```
+
+Validation results on the same 10,000 shots:
+
+```text
+MiniAlphaQubit-style LER: 0.0446
+FlatMLP LER:              0.0491
+Provided PyMatching LER:  0.0139
+```
+
+A harder d=3, r=25 experiment was also tested with the same small MiniAlphaQubit-style model. It
+did not learn useful signal in a 5-epoch CPU smoke run:
+
+```text
+experiment: surface_code_bX_d3_r25_center_3_5
+dense shape: [B, 26, 8, 1]
+MiniAlphaQubit-style best LER: 0.4855
+FlatMLP best LER:              0.4839
+Provided PyMatching LER:       0.4258
+```
+
+This means the current small model is only a scaffold. Beating PyMatching on longer-round real
+data will require larger GPU training, stronger architecture choices, threshold tuning, and
+probably training across multiple centers/bases/round counts rather than one tiny split.
+
 ## Known Limitations
 
 This is not an official AlphaQubit reproduction.
