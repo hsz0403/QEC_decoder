@@ -29,7 +29,7 @@ tracking = ["wandb", "tensorboard"]
 zenodo = ["zenodo_get"]
 
 [tool.setuptools.packages.find]
-include = ["qecml*"]
+include = ["qecml*", "bbcode_dataset*"]
 
 [tool.ruff]
 line-length = 100

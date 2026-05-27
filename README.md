@@ -68,6 +68,25 @@ detector_coords: optional [n_detectors, coord_dim]
 metadata_json: JSON metadata
 ```
 
+## Generate BB-Code Data
+
+This repo also includes a BB-code dataset generator for bivariate bicycle quantum LDPC memory
+experiments, including `[[72,12,6]]`, `[[144,12,12]]`, and `[[288,12,18]]`. It can emit HDF5
+datasets with repeated check measurements, detection events, final clean syndromes, and logical
+observable flip labels.
+
+```bash
+python -m bbcode_dataset.generate \
+  --code bb_144 \
+  --noise circuit \
+  --cycles 12 \
+  --shots 10000 \
+  --p 0.001 \
+  --out runs/data/bb144_train.h5
+```
+
+See `docs/bbcode_dataset.md` for the full schema and code list.
+
 ## Run PyMatching
 
 ```bash

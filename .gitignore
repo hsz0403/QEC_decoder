@@ -25,6 +25,8 @@ env/
 /runs/mini_aq_zenodo_d3_r25_smoke/
 *.pt
 *.npz
+*.h5
+*.pdf
 
 # Local/editor files
 .DS_Store
