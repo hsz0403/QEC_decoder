@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "qec-neural-decoder"
 version = "0.1.0"
-description = "Minimal AlphaQubit-style neural decoder scaffold for surface-code QEC experiments."
+description = "Surface-code code-capacity CNN decoder prototype."
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
@@ -29,7 +29,7 @@ tracking = ["wandb", "tensorboard"]
 zenodo = ["zenodo_get"]
 
 [tool.setuptools.packages.find]
-include = ["qecml*", "bbcode_dataset*"]
+include = ["qecml*", "surface_code_capacity*"]
 
 [tool.ruff]
 line-length = 100

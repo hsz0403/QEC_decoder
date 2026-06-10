@@ -1,0 +1,2 @@
+{"epoch": 1, "train_loss": 1.0487212039986435, "val_bce": 0.6185828447341919, "val_bit_accuracy": 0.722599983215332, "val_label_positive_rate": 0.23632000386714935, "val_logical_error_rate": 0.2773999869823456, "val_prediction_positive_rate": 0.21155999600887299}
+{"epoch": 2, "train_loss": 1.0022160605508454, "val_bce": 0.6347488164901733, "val_bit_accuracy": 0.7224000096321106, "val_label_positive_rate": 0.23632000386714935, "val_logical_error_rate": 0.2775999903678894, "val_prediction_positive_rate": 0.2497600018978119}

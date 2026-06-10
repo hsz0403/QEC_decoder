@@ -1,0 +1,1 @@
+{"epoch": 1, "train_loss": 1.0034473179554453, "val_bce": 0.6098918914794922, "val_bit_accuracy": 0.7260599732398987, "val_label_positive_rate": 0.23632000386714935, "val_logical_error_rate": 0.27393999695777893, "val_prediction_positive_rate": 0.34046000242233276}

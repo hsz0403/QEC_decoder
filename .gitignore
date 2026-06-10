@@ -16,6 +16,7 @@ env/
 *.zip
 
 # Generated experiment outputs
+/logs/
 /runs/data/
 /runs/checkpoints/
 /runs/mlp_d3_smoke/

@@ -1,320 +1,117 @@
-# qec-neural-decoder
+# Surface-Code CNN Decoder
 
-Minimal AlphaQubit-1-style surface-code neural decoder scaffold. This repo starts with
-Stim-generated rotated surface-code memory data, compares against a PyMatching MWPM baseline,
-and trains small neural decoders.
+This branch contains a focused surface-code CNN decoder prototype.
 
-This is research infrastructure, not an official AlphaQubit reproduction.
+The experiment is intentionally simple: it uses code-capacity surface-code data with no
+measurement error and trains a CNN to map binary syndrome events to a binary logical-action
+label.
 
-## Quickstart
+```text
+code:        rotated surface code
+distance:    d = 11
+error rate:  p = 0.05
+noise:       iid data-error mechanisms
+input:       syndrome / detector events, shape [shots, 120]
+label:       logical_action, shape [shots, 1]
+```
+
+The main writeup is:
+
+```text
+docs/surface_code_cnn.md
+```
+
+It includes the dataset schema, visual examples, model architecture, training configs, loss,
+training curves, baseline comparison, and current results.
+
+## Results
+
+Validation logical error rate:
+
+```text
+all-zero baseline: 0.23632
+H=128 best:        0.23026
+H=512 best:        0.22180
+```
+
+The H=512 checkpoint is the best current model, but its final epoch regresses, so evaluation should
+use the saved best checkpoint rather than the final epoch.
+
+## Visuals
+
+Detector-event examples:
+
+```text
+reports/surface_iid_d11_p005_examples/montage_high_contrast.png
+```
+
+Training curves:
+
+```text
+reports/surface_code_training_curves.png
+```
+
+## Code Layout
+
+```text
+surface_code_capacity/
+  data.py                         Surface-code iid dataset generation
+  model.py                        SurfaceCodeCNNDecoder
+
+scripts/
+  generate_surface_code_iid.py    Generate train/validation data
+  visualize_surface_code_samples.py
+                                  Generate detector-event visualizations
+  plot_surface_code_training.py   Plot training curves
+  train_surface_code_cnn.py       Train CNN decoder
+
+configs/
+  surface_iid_d11_p005.yaml
+  train_surface_cnn_d11_h128.yaml
+  train_surface_cnn_d11_h512.yaml
+
+docs/
+  surface_code_cnn.md
+```
+
+## Reproduce
+
+Generate data:
 
 ```bash
-make setup
-make test
-python scripts/generate_stim_dataset.py --config configs/stim_d3_smoke.yaml
-python scripts/run_pymatching_baseline.py --data runs/data/stim_d3_smoke_val.npz
-python scripts/train.py --config configs/train_mlp_d3_smoke.yaml
-python scripts/train.py --config configs/train_mini_aq_d3_smoke.yaml
-python scripts/evaluate.py --checkpoint runs/mini_aq_d3_smoke/checkpoint.pt --data runs/data/stim_d3_smoke_val.npz
+python scripts/generate_surface_code_iid.py --config configs/surface_iid_d11_p005.yaml
 ```
 
-On clusters where GPU access requires `sbatch`, keep the smoke tests on CPU and submit larger
-training jobs through the scheduler. The training script automatically uses CUDA only when a GPU
-is visible to the job. The default smoke configs set `training.num_threads: 1` because many-login
-node CPU thread pools can be slower than a single thread for these tiny models.
-
-## Concepts
-
-A physical qubit is a hardware-level qubit that can suffer errors. A logical qubit is encoded
-across many physical qubits so that errors can be detected and corrected. Stabilizers are
-commuting measurements that reveal error information without directly measuring the logical
-state. A syndrome is the collection of stabilizer measurement outcomes. A detection event is a
-change in syndrome information that signals a likely error in space-time. A logical observable
-flip is an encoded logical failure label, usually the target output of a decoder in a memory
-experiment.
-
-A surface-code memory experiment repeatedly measures stabilizers for a distance-`d` code and asks
-whether the stored logical qubit was flipped. Stim generates fast synthetic stabilizer circuits and
-detector samples. PyMatching implements minimum-weight perfect matching, a standard strong
-baseline for graphlike detector error models. The AlphaQubit-style neural decoder here is a small
-recurrent transformer-like model over detector events, intended as a readable starting point for
-later adaptation experiments.
-
-## Repo Structure
-
-```text
-configs/          YAML configs for data generation and training
-qecml/sim/        Stim circuit generation and sampling
-qecml/data/       Common NPZ schema, coordinate mapping, Zenodo inspection helpers
-qecml/decoders/   PyMatching and neural decoders
-qecml/training/   Metrics, losses, trainer, checkpoint evaluation
-scripts/          CLI entry points
-tests/            Unit and smoke tests
-notebooks/        Starter notebooks
-```
-
-## Generate Data
+Visualize samples:
 
 ```bash
-python scripts/generate_stim_dataset.py --config configs/stim_d3_smoke.yaml
+python scripts/visualize_surface_code_samples.py \
+  --data runs/data/surface_iid_d11_p005_val.npz \
+  --out-dir reports/surface_iid_d11_p005_examples \
+  --num-samples 8
 ```
 
-This writes common-schema `.npz` files with:
-
-```text
-events: [shots, n_detectors]
-labels: [shots, n_observables]
-detector_coords: optional [n_detectors, coord_dim]
-metadata_json: JSON metadata
-```
-
-## Generate BB-Code Data
-
-This repo also includes a BB-code dataset generator for bivariate bicycle quantum LDPC memory
-experiments, including `[[72,12,6]]`, `[[144,12,12]]`, and `[[288,12,18]]`. It can emit HDF5
-datasets with repeated check measurements, detection events, final clean syndromes, and logical
-observable flip labels.
+Train:
 
 ```bash
-python -m bbcode_dataset.generate \
-  --code bb_144 \
-  --noise circuit \
-  --cycles 12 \
-  --shots 10000 \
-  --p 0.001 \
-  --out runs/data/bb144_train.h5
+python scripts/train_surface_code_cnn.py --config configs/train_surface_cnn_d11_h128.yaml
+python scripts/train_surface_code_cnn.py --config configs/train_surface_cnn_d11_h512.yaml
 ```
 
-See `docs/bbcode_dataset.md` for the full schema and code list.
-
-## Run PyMatching
+Plot curves:
 
 ```bash
-python scripts/run_pymatching_baseline.py --data runs/data/stim_d3_smoke_val.npz
+python scripts/plot_surface_code_training.py
 ```
 
-The script reconstructs the Stim circuit from dataset metadata, builds a detector error model,
-runs PyMatching, prints logical error rate, and saves metrics under `runs/baselines/`.
-
-## Train Neural Decoders
-
-Flat MLP:
+On Della, use the Slurm scripts:
 
 ```bash
-python scripts/train.py --config configs/train_mlp_d3_smoke.yaml
+sbatch slurm/surface_code_train_h128.sbatch
+sbatch slurm/surface_code_train_h512.sbatch
 ```
 
-Mini AlphaQubit-style recurrent transformer:
+## Notes
 
-```bash
-python scripts/train.py --config configs/train_mini_aq_d3_smoke.yaml
-```
-
-Each run saves:
-
-```text
-runs/<run_name>/checkpoint.pt
-runs/<run_name>/metrics.jsonl
-runs/<run_name>/config.yaml
-```
-
-## Evaluate
-
-```bash
-python scripts/evaluate.py \
-  --checkpoint runs/mini_aq_d3_smoke/checkpoint.pt \
-  --data runs/data/stim_d3_smoke_val.npz
-```
-
-Metrics include BCE, logical error rate at threshold 0.5, accuracy, label positive rate,
-prediction positive rate, ROC-AUC when both classes are present, and calibration error.
-
-## Inspect Zenodo 6804040
-
-Zenodo record 6804040 is optional and not required for the synthetic pipeline.
-
-```bash
-python scripts/download_zenodo_6804040.py
-python scripts/inspect_zenodo_6804040.py
-```
-
-The inspection script prints the archive tree, extracts README-like files, identifies likely
-sample/circuit/prediction/metadata files, and writes `runs/zenodo_6804040_inspection.md`.
-
-## Data Examples
-
-The examples below come from the downloaded Zenodo 6804040 experiment:
-
-```text
-surface_code_bX_d3_r01_center_3_5
-```
-
-This is a surface-code memory experiment with:
-
-```text
-basis: X
-distance: 3
-rounds: 1
-shots: 50000
-circuit_detectors: 8
-circuit_observables: 1
-```
-
-The raw archive stores detector events in Stim `b8` format, where each shot is bit-packed and
-byte-aligned. For this experiment there are 8 detector bits per shot, so each shot is exactly one
-byte in `detection_events.b8`. The first 16 raw bytes are:
-
-```python
-[96, 66, 0, 0, 0, 68, 0, 0, 0, 32, 0, 0, 0, 0, 0, 0]
-```
-
-Labels are stored in `obs_flips_actual.01`, one logical observable flip per line. The first 12
-raw label lines are:
-
-```python
-["0", "0", "0", "0", "0", "0", "0", "0", "0", "1", "0", "0"]
-```
-
-The Zenodo archive also provides PyMatching predictions. The first 12 raw PyMatching prediction
-lines for the same experiment are:
-
-```python
-["0", "0", "0", "0", "0", "0", "0", "0", "0", "1", "0", "0"]
-```
-
-After conversion to this repo's common `.npz` schema, the validation split used for the first ML
-run is:
-
-```text
-file: runs/data/zenodo_6804040_surface_code_bX_d3_r01_center_3_5_val.npz
-shots: 10000
-source shots: 40000 through 49999
-events shape: [10000, 8]
-labels shape: [10000, 1]
-detector_coords shape: [8, 3]
-label positive rate: 0.0795
-```
-
-The first 8 converted validation detector-event rows are:
-
-```python
-[
-    [1, 0, 0, 0, 1, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 1, 0, 1, 0, 0, 1],
-    [0, 0, 0, 0, 0, 0, 1, 1],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 1, 0, 0, 0, 1, 0],
-    [0, 0, 0, 0, 0, 0, 0, 1],
-]
-```
-
-The corresponding ground-truth logical observable flip labels are:
-
-```python
-[0, 0, 0, 0, 0, 0, 0, 1]
-```
-
-The detector coordinates extracted from `circuit_ideal.stim` are:
-
-```python
-[
-    [1.0, 4.0, 0.0],
-    [3.0, 4.0, 0.0],
-    [3.0, 6.0, 0.0],
-    [5.0, 6.0, 0.0],
-    [1.0, 4.0, 1.0],
-    [3.0, 4.0, 1.0],
-    [3.0, 6.0, 1.0],
-    [5.0, 6.0, 1.0],
-]
-```
-
-For these same 8 validation shots, the current trained `FlatMLPDecoder` produced:
-
-```python
-logits = [-2.7008, -6.3271, -0.0952, -0.0649, -6.3271, -6.3271, -2.5803, 5.5866]
-probs  = [0.0629, 0.0018, 0.4762, 0.4838, 0.0018, 0.0018, 0.0704, 0.9963]
-preds  = [0, 0, 0, 0, 0, 0, 0, 1]
-```
-
-The Zenodo-provided PyMatching predictions on the same 8 validation shots are:
-
-```python
-[0, 0, 0, 0, 0, 0, 0, 1]
-```
-
-On the full 10,000-shot validation split, the current flat MLP reached logical error rate
-`0.0491`, while the provided PyMatching predictions reached `0.0139`.
-
-## Mini AlphaQubit-Style Result
-
-The repo also includes a small AlphaQubit-style recurrent transformer decoder:
-
-```text
-qecml/decoders/neural/mini_alphaqubit.py
-```
-
-It is not an official AlphaQubit reproduction. It is a compact open implementation with the same
-high-level idea of processing detector events as a space-time sequence with per-site recurrent
-state and site self-attention.
-
-For the real `surface_code_bX_d3_r01_center_3_5` split above, coordinate mapping converts flat
-events into:
-
-```text
-dense events: [10000, 3, 4, 1] on validation
-```
-
-The trained smoke model uses:
-
-```text
-hidden_dim: 64
-num_layers: 1
-num_heads: 4
-dropout: 0.1
-parameters: 79,681
-loss: binary cross entropy with logits
-optimizer: AdamW
-epochs: 10
-```
-
-Validation results on the same 10,000 shots:
-
-```text
-MiniAlphaQubit-style LER: 0.0446
-FlatMLP LER:              0.0491
-Provided PyMatching LER:  0.0139
-```
-
-A harder d=3, r=25 experiment was also tested with the same small MiniAlphaQubit-style model. It
-did not learn useful signal in a 5-epoch CPU smoke run:
-
-```text
-experiment: surface_code_bX_d3_r25_center_3_5
-dense shape: [B, 26, 8, 1]
-MiniAlphaQubit-style best LER: 0.4855
-FlatMLP best LER:              0.4839
-Provided PyMatching LER:       0.4258
-```
-
-This means the current small model is only a scaffold. Beating PyMatching on longer-round real
-data will require larger GPU training, stronger architecture choices, threshold tuning, and
-probably training across multiple centers/bases/round counts rather than one tiny split.
-
-## Known Limitations
-
-This is not an official AlphaQubit reproduction.
-This does not use Google/DeepMind code or weights.
-This starts with simplified synthetic noise.
-The first models are intentionally small.
-Online adaptation/RL is future work.
-Coordinate mapping is intentionally conservative and falls back instead of silently reshaping
-ambiguous detector coordinates.
-
-## Next Steps Toward Online Adaptation
-
-Add synthetic drift benchmarks, supervised fine-tuning baselines, parameter-efficient adapters,
-partial-feedback experiments, and richer nonuniform or biased noise models after the synthetic
-Stim/PyMatching/neural pipeline is stable.
+Large generated artifacts such as `.npz` datasets and `.pt` checkpoints are intentionally not
+tracked. The repo keeps configs, code, small metrics, summaries, figures, and documentation.

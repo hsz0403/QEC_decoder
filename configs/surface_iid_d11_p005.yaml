@@ -1,0 +1,9 @@
+basis: z
+distance: 11
+p: 0.05
+shots_train: 200000
+shots_val: 50000
+seed: 11
+store_errors: false
+output_train: runs/data/surface_iid_d11_p005_train.npz
+output_val: runs/data/surface_iid_d11_p005_val.npz

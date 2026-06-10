@@ -1,0 +1,21 @@
+data:
+  train: runs/data/surface_iid_d11_p005_train.npz
+  val: runs/data/surface_iid_d11_p005_val.npz
+model:
+  hidden_dim: 512
+  num_blocks: 8
+  bottleneck_ratio: 4
+  dropout: 0.05
+training:
+  batch_size: 1024
+  epochs: 30
+  lr: 0.0002
+  weight_decay: 1.0e-05
+  grad_clip_norm: 1.0
+  pos_weight: auto
+  seed: 512
+  num_workers: 0
+  progress: false
+  resume: true
+output:
+  run_dir: runs/surface_cnn_d11_p005_h512

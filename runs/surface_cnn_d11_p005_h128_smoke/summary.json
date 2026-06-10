@@ -1,0 +1,12 @@
+{
+  "run_dir": "runs/surface_cnn_d11_p005_h128_smoke",
+  "checkpoint": "runs/surface_cnn_d11_p005_h128_smoke/checkpoint.pt",
+  "best_val_logical_error_rate": 0.2773999869823456,
+  "final_val": {
+    "bce": 0.634440004825592,
+    "bit_accuracy": 0.7232999801635742,
+    "logical_error_rate": 0.2766999900341034,
+    "label_positive_rate": 0.23632000386714935,
+    "prediction_positive_rate": 0.25130000710487366
+  }
+}

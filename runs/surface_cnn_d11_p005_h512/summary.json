@@ -1,0 +1,12 @@
+{
+  "run_dir": "runs/surface_cnn_d11_p005_h512",
+  "checkpoint": "runs/surface_cnn_d11_p005_h512/checkpoint.pt",
+  "best_val_logical_error_rate": 0.22179999947547913,
+  "final_val": {
+    "bce": 0.5884334444999695,
+    "bit_accuracy": 0.7379800081253052,
+    "logical_error_rate": 0.2620199918746948,
+    "label_positive_rate": 0.23632000386714935,
+    "prediction_positive_rate": 0.32133999466896057
+  }
+}

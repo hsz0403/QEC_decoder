@@ -1,9 +1,0 @@
-basis: z
-distance: 3
-rounds: 3
-p: 0.005
-shots_train: 20000
-shots_val: 5000
-seed: 0
-output_train: runs/data/stim_d3_smoke_train.npz
-output_val: runs/data/stim_d3_smoke_val.npz
